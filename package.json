@@ -1,0 +1,27 @@
+{
+  "name": "hiper-tetris",
+  "version": "1.0.0",
+  "description": "Tetris game on TypeScript",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Fabri150/hiper-tetris.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Fabri150/hiper-tetris/issues"
+  },
+  "homepage": "https://github.com/Fabri150/hiper-tetris#readme",
+  "devDependencies": {
+    "vitest": "^4.1.11"
+  },
+  "dependencies": {
+    "typescript": "^7.0.2"
+  }
+}
