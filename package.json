@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/Fabri150/hiper-tetris#readme",
   "devDependencies": {
+    "@rolldown/binding-win32-x64-msvc": "^1.2.5",
     "vitest": "^4.1.11"
   },
   "dependencies": {
