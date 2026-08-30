@@ -1,4 +1,4 @@
-import { IRotador } from "./IRotador";
+import { IRotador } from "../IRotador";
 
 export abstract class Pieza implements IRotador {
     protected _x: number = 3;
