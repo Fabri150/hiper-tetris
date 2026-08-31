@@ -1,9 +1,51 @@
-export class Tetris {
-    constructor(
-        public piece: string
-    ) {}
+import { Reloj } from './Reloj';
+import { Tablero } from './Tablero';
+import { PiezaT } from './piezas/PiezaT';
+import { PiezaPalo } from './piezas/PiezaPalo';
+import { PiezaPerro } from './piezas/PiezaPerro';
+import { PiezaCuadrado } from './piezas/PiezaCuadrado';
+import { generarPiezaAleatoria } from './piezas/GeneradorPiezas';
 
-    iniciarJuego(Tetris: Tetris) {
+export class Juego {
+    private tablero = new Tablero();
+    private piezaActual = new PiezaT();
+    private reloj: Reloj;
+
+    constructor() {
+        this.reloj = new Reloj(1000, () => this.ejecutarCicloCaida()); //caida automatica cada 1 segundo
     }
 
+    iniciar() {
+        this.reloj.iniciar();
+    }
+
+
+   private ejecutarCicloCaida() {
+    const futuroY = this.piezaActual.y + 1;
+
+    if (!this.tablero.colisiona(this.piezaActual, this.piezaActual.x, futuroY)) {
+        this.piezaActual.moverAbajo();
+    } else {
+        // 1. Fijar pieza actual al tablero (Falta hacer este metodo)
+        // this.tablero.fijarPieza(this.piezaActual);
+        
+        // 2. Generar la nueva pieza
+        this.piezaActual = generarPiezaAleatoria();
+    }
+}
+
+    // Lógica impulsada por el usuario (Teclado)
+    moverIzquierda() {
+        const futuroX = this.piezaActual.x - 1;
+        if (!this.tablero.colisiona(this.piezaActual, futuroX, this.piezaActual.y)) {
+            this.piezaActual.moverIzquierda();
+        }
+    }
+
+    moverDerecha() {
+        const futuroX = this.piezaActual.x + 1;
+        if (!this.tablero.colisiona(this.piezaActual, futuroX, this.piezaActual.y)) {
+            this.piezaActual.moverDerecha();
+        }
+    }
 }
