@@ -21,9 +21,9 @@ export class Juego {
 
 
    private ejecutarCicloCaida() {
-    const futuroY = this.piezaActual.y + 1;
+    const futuroY = this.piezaActual.fila + 1;
 
-    if (!this.tablero.colisiona(this.piezaActual, this.piezaActual.x, futuroY)) {
+    if (!this.tablero.colisiona(this.piezaActual, this.piezaActual.columna, futuroY)) {
         this.piezaActual.moverAbajo();
     } else {
         // 1. Fijar pieza actual al tablero (Falta hacer este metodo)
@@ -36,15 +36,15 @@ export class Juego {
 
     // Lógica impulsada por el usuario (Teclado)
     moverIzquierda() {
-        const futuroX = this.piezaActual.x - 1;
-        if (!this.tablero.colisiona(this.piezaActual, futuroX, this.piezaActual.y)) {
+        const futuroX = this.piezaActual.columna - 1;
+        if (!this.tablero.colisiona(this.piezaActual, futuroX, this.piezaActual.fila)) {
             this.piezaActual.moverIzquierda();
         }
     }
 
     moverDerecha() {
-        const futuroX = this.piezaActual.x + 1;
-        if (!this.tablero.colisiona(this.piezaActual, futuroX, this.piezaActual.y)) {
+        const futuroX = this.piezaActual.columna + 1;
+        if (!this.tablero.colisiona(this.piezaActual, futuroX, this.piezaActual.fila)) {
             this.piezaActual.moverDerecha();
         }
     }
