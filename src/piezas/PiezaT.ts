@@ -13,10 +13,10 @@ export class PiezaT extends Pieza {
         const n = this._forma.length;
         const nuevaForma: number[][] = [];
 
-        for (let i = 0; i < n; i++) {
+        for (let columna = 0; columna < n; columna++) {
             nuevaForma.push([]);
-            for (let j = 0; j < n; j++) {
-                nuevaForma[i][j] = this._forma[n - 1 - j][i];
+            for (let fila = 0; fila < n; fila++) {
+                nuevaForma[columna][fila] = this._forma[n - 1 - fila][columna];
             }
         }
         
@@ -27,10 +27,10 @@ export class PiezaT extends Pieza {
         const n = this._forma.length;
         const nuevaForma: number[][] = [];
 
-        for (let i = 0; i < n; i++) {
+        for (let columna = 0; columna < n; columna++) {
             nuevaForma.push([]);
-            for (let j = 0; j < n; j++) {
-                nuevaForma[i][j] = this._forma[j][n - 1 - i];
+            for (let fila = 0; fila < n; fila++) {
+                nuevaForma[columna][fila] = this._forma[fila][n - 1 - columna];
             }
         }
         
