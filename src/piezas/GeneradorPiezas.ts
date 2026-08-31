@@ -3,19 +3,21 @@ import { PiezaT } from './PiezaT';
 import { PiezaCuadrado } from './PiezaCuadrado';
 import { PiezaPerro } from "./PiezaPerro";
 import { PiezaPalo } from "./PiezaPalo";
+import { PiezaL } from "./PiezaL";
 
 
-export function generarPiezaAleatoria(): Pieza {
-    // Aquí agregarás la L, la I, la S, etc.
+export function generarPiezaAleatoria(random: () => number = Math.random): Pieza {
     const piezasDisponibles = [
         new PiezaT(),
         new PiezaCuadrado(),
-        new PiezaPerro(),
-        new PiezaPalo()
+        new PiezaPalo(),
+        new PiezaL("izquierda"),
+        new PiezaL("derecha"),
+        new PiezaPerro("izquierda"),
+        new PiezaPerro("derecha")
     ];
 
-    // Math.random() elige un número entre 0 y la cantidad de piezas
-    const indiceAleatorio = Math.floor(Math.random() * piezasDisponibles.length);
+    const indiceAleatorio = Math.floor(random() * piezasDisponibles.length);
     
     return piezasDisponibles[indiceAleatorio];
 }
