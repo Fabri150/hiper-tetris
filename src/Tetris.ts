@@ -21,20 +21,23 @@ export class Juego {
 
 
    private ejecutarCicloCaida() {
-    const futuroY = this.piezaActual.fila + 1;
+        const futuroY = this.piezaActual.fila + 1;
 
-    if (!this.tablero.colisiona(this.piezaActual, this.piezaActual.columna, futuroY)) {
-        this.piezaActual.moverAbajo();
-    } else {
-        // 1. Fijar pieza actual al tablero (Falta hacer este metodo)
-        // this.tablero.fijarPieza(this.piezaActual);
-        
-        // 2. Generar la nueva pieza
-        this.piezaActual = generarPiezaAleatoria();
+        if (!this.tablero.colisiona(this.piezaActual, this.piezaActual.columna, futuroY)) {
+            this.piezaActual.moverAbajo();
+        } else {
+            this.tablero.fijarPieza(this.piezaActual);
+            
+            // (Futuro paso) aca es donde también se llamara a this.tablero.limpiarLineas();
+            
+            // (Futuro paso) aca es donde se va vereficar si perdes si la pieza nueva nace colisionando
+            
+            // 2. Nace una nueva pieza arriba
+            this.piezaActual = generarPiezaAleatoria();
+        }
     }
-}
 
-    // Lógica impulsada por el usuario (Teclado)
+    // Lógica impulsada por el teclado
     moverIzquierda() {
         const futuroX = this.piezaActual.columna - 1;
         if (!this.tablero.colisiona(this.piezaActual, futuroX, this.piezaActual.fila)) {

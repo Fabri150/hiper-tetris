@@ -12,10 +12,32 @@ export class Tablero {
     get celdas(): number[][] {
         return this._celdas; }
 
-colisiona(pieza: Pieza, futuroX: number, futuroY: number): boolean {
+
+fijarPieza(pieza: Pieza): void {
     const matriz = pieza.forma;
 
     for (let f = 0; f < matriz.length; f++) {
+        for (let c = 0; c < matriz[f].length; c++) {
+            
+            // Si hay un bloque sólido en la pieza...
+            if (matriz[f][c] !== 0) {
+                const tableroY = pieza.fila + f;
+                const tableroX = pieza.columna + c;
+
+                // Prevenimos escribir fuera de la memoria del array (por seguridad)
+                if (tableroY >= 0 && tableroY < this._alto && tableroX >= 0 && tableroX < this._ancho) {
+                    // Fijamos el valor. Usamos 1 (o podrías usar un ID de color futuro)
+                    this._celdas[tableroY][tableroX] = 1; 
+                }
+            }
+        }
+    }
+}
+
+    colisiona(pieza: Pieza, futuroX: number, futuroY: number): boolean {
+     const matriz = pieza.forma;
+
+     for (let f = 0; f < matriz.length; f++) {
         for (let c = 0; c < matriz[f].length; c++) {
 
             if (matriz[f][c] === 0) continue;
@@ -40,5 +62,7 @@ colisiona(pieza: Pieza, futuroX: number, futuroY: number): boolean {
     }
     
     return false;
+    
 }
+
 }
