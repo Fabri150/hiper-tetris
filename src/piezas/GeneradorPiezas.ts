@@ -18,6 +18,12 @@ export function generarPiezaAleatoria(random: () => number = Math.random): Pieza
     ];
 
     const indiceAleatorio = Math.floor(random() * piezasDisponibles.length);
-    
-    return piezasDisponibles[indiceAleatorio];
+    const piezaElegida = piezasDisponibles[indiceAleatorio];
+    const cantidadRotaciones = Math.floor(random() * 4);
+
+    for (let rotacion = 0; rotacion < cantidadRotaciones; rotacion++) {
+        piezaElegida.rotarDerecha();
+    }
+
+    return piezaElegida;
 }
