@@ -43,6 +43,28 @@ export class Tablero {
         return true;
     }
 
+    ubicarPiezaArriba(
+        pieza: Pieza,
+        random: () => number = Math.random
+    ): boolean {
+        const anchoPieza = pieza.forma[0].length;
+        const columnasValidas: number[] = [];
+
+        for (let columna = 0; columna <= this._ancho - anchoPieza; columna++) {
+            if (!this.colisiona(pieza, columna, 0)) {
+                columnasValidas.push(columna);
+            }
+        }
+
+        if (columnasValidas.length === 0) {
+            return false;
+        }
+
+        const indice = Math.floor(random() * columnasValidas.length);
+        pieza.posicionar(columnasValidas[indice], 0);
+        return true;
+    }
+
     colisiona(pieza: Pieza, futuroX: number, futuroY: number): boolean {
      const matriz = pieza.forma;
 

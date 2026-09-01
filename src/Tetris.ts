@@ -16,6 +16,27 @@ export class Tetris {
         this.reloj.iniciar();
     }
 
+    detener(): void {
+        this.reloj.detener();
+    }
+
+    tick(): void {
+        this.reloj.tick();
+    }
+
+    get estadoPiezaActual() {
+        return {
+            nombre: this.piezaActual.nombre,
+            forma: this.piezaActual.forma.map(fila => [...fila]),
+            columna: this.piezaActual.columna,
+            fila: this.piezaActual.fila
+        };
+    }
+
+    get celdasTablero(): number[][] {
+        return this.tablero.celdas;
+    }
+
 
    private ejecutarCicloCaida() {
         const futuroY = this.piezaActual.fila + 1;

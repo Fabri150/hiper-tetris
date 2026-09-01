@@ -91,4 +91,28 @@ describe('Tablero', () => {
 
         expect(tablero.celdas[0][0]).toBe(0);
     });
+
+    it('debe ubicar una pieza arriba en una columna aleatoria valida', () => {
+        const tablero = new Tablero();
+        const pieza = new PiezaCuadrado();
+
+        const fueUbicada = tablero.ubicarPiezaArriba(pieza, () => 0);
+
+        expect(fueUbicada).toBe(true);
+        expect(pieza.columna).toBe(0);
+        expect(pieza.fila).toBe(0);
+        expect(tablero.colisiona(pieza, pieza.columna, pieza.fila)).toBe(false);
+    });
+
+    it('debe devolver false si no hay una posicion superior disponible', () => {
+        const tablero = new Tablero();
+        for (let columna = 0; columna < 10; columna += 2) {
+            const piezaFijada = new PiezaCuadrado();
+            piezaFijada.posicionar(columna, 0);
+            tablero.fijarPieza(piezaFijada);
+        }
+        const piezaNueva = new PiezaCuadrado();
+
+        expect(tablero.ubicarPiezaArriba(piezaNueva, () => 0)).toBe(false);
+    });
 });
