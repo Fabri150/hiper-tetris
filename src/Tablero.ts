@@ -10,29 +10,38 @@ export class Tablero {
         this._celdas = Array.from({ length: this._alto }, () => Array(this._ancho).fill(0));
     }
     get celdas(): number[][] {
-        return this._celdas; }
+        return this._celdas.map(fila => [...fila]);
+    }
 
 
-fijarPieza(pieza: Pieza): void {
-    const matriz = pieza.forma;
+    fijarPieza(pieza: Pieza): boolean {
+        const matriz = pieza.forma;
+        const bloques: Array<[number, number]> = [];
 
-    for (let f = 0; f < matriz.length; f++) {
-        for (let c = 0; c < matriz[f].length; c++) {
-            
-            // Si hay un bloque sólido en la pieza...
-            if (matriz[f][c] !== 0) {
+        for (let f = 0; f < matriz.length; f++) {
+            for (let c = 0; c < matriz[f].length; c++) {
+                if (matriz[f][c] === 0) continue;
+
                 const tableroY = pieza.fila + f;
                 const tableroX = pieza.columna + c;
+                const estaFuera =
+                    tableroY < 0 || tableroY >= this._alto ||
+                    tableroX < 0 || tableroX >= this._ancho;
 
-                // Prevenimos escribir fuera de la memoria del array (por seguridad)
-                if (tableroY >= 0 && tableroY < this._alto && tableroX >= 0 && tableroX < this._ancho) {
-                    // Fijamos el valor. Usamos 1 (o podrías usar un ID de color futuro)
-                    this._celdas[tableroY][tableroX] = 1; 
+                if (estaFuera || this._celdas[tableroY][tableroX] !== 0) {
+                    return false;
                 }
+
+                bloques.push([tableroY, tableroX]);
             }
         }
+
+        for (const [fila, columna] of bloques) {
+            this._celdas[fila][columna] = 1;
+        }
+
+        return true;
     }
-}
 
     colisiona(pieza: Pieza, futuroX: number, futuroY: number): boolean {
      const matriz = pieza.forma;
