@@ -39,6 +39,10 @@ export class Tetris {
         return this.tablero.celdas;
     }
 
+    get cantidadLineas(): number {
+        return this.tablero.cantidadLineas();
+    }
+
 
    private ejecutarCicloCaida(): void {
         const futuroY = this.piezaActual.fila + 1;
@@ -47,8 +51,7 @@ export class Tetris {
             this.piezaActual.moverAbajo();
         } else {
             this.tablero.fijarPieza(this.piezaActual);
-            
-            // (Futuro paso) aca es donde también se llamara a this.tablero.limpiarLineas();
+            this.tablero.limpiarLineas();
             
             // (Futuro paso) aca es donde se va vereficar si perdes si la pieza nueva nace colisionando
             

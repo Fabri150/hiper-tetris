@@ -124,4 +124,23 @@ describe("Movimientos de Tetris", () => {
         expect(tetris.estadoPiezaActual.fila).toBe(1);
         expect(tetris.celdasTablero).toEqual(tableroConPiezaFijada);
     });
+
+    test("limpia y cuenta una línea cuando se completa durante el juego", () => {
+        const random = aleatoriedadControlada(
+            2 / 7, 0, 0,
+            2 / 7, 0, 4 / 7,
+            1 / 7, 0, 0.999999,
+            0, 0, 0
+        );
+        const tetris = new Tetris(random);
+
+        for (let tick = 0; tick < 59; tick++) {
+            tetris.tick();
+        }
+
+        expect(tetris.cantidadLineas).toBe(1);
+        expect(tetris.celdasTablero[19]).toEqual([
+            0, 0, 0, 0, 0, 0, 0, 0, 1, 1
+        ]);
+    });
 });
