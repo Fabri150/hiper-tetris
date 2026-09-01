@@ -218,4 +218,13 @@ describe.each(casosPiezas)("Pieza $nombre", ({ nombre, crear, formaInicial, form
 
         expect(pieza.forma).toEqual(formaOriginal);
     });
+
+    it("puede ubicarse en una posición indicada por el tablero", () => {
+        const pieza = crear();
+
+        pieza.posicionar(5, 2);
+
+        expect(pieza.columna).toBe(5);
+        expect(pieza.fila).toBe(2);
+    });
 });
