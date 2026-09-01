@@ -4,11 +4,16 @@ export class Reloj {
         private _intervaloMs: number = 1000,
         private _onTick: () => void
     ) {}
+
+    tick(): void {
+        this._onTick();
+    }
+
     iniciar(): void {
         this.detener(); 
         
         this._timerId = setInterval(() => {
-            this._onTick();
+            this.tick();
         }, this._intervaloMs);
     }
 

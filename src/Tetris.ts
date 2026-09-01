@@ -1,12 +1,9 @@
 import { Reloj } from './Reloj';
 import { Tablero } from './Tablero';
 import { PiezaT } from './piezas/PiezaT';
-import { PiezaPalo } from './piezas/PiezaPalo';
-import { PiezaPerro } from './piezas/PiezaPerro';
-import { PiezaCuadrado } from './piezas/PiezaCuadrado';
 import { generarPiezaAleatoria } from './piezas/GeneradorPiezas';
 
-export class Juego {
+export class Tetris {
     private tablero = new Tablero();
     private piezaActual = new PiezaT();
     private reloj: Reloj;
