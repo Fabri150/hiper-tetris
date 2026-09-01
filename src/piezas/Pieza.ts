@@ -15,8 +15,15 @@ export abstract class Pieza implements IRotador {
     get fila() { return this._fila; }
 
     moverAbajo(): void { this._fila++; }
+
     moverIzquierda(): void { this._columna--; }
+
     moverDerecha(): void { this._columna++; }
+    
+    posicionar(columna: number, fila: number = 0): void {
+        this._columna = columna;
+        this._fila = fila;
+    }
 
     rotarDerecha(): void {
         const tamaño = this._forma.length;
