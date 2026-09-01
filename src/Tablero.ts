@@ -2,6 +2,8 @@ import { Pieza } from "./piezas/Pieza";
 
 export class Tablero {
     private _celdas: number[][];
+    private _cantidadLineas: number = 0;
+
     constructor (
      private _ancho: number = 10,
      private _alto: number = 20
@@ -63,6 +65,26 @@ export class Tablero {
         const indice = Math.floor(random() * columnasValidas.length);
         pieza.posicionar(columnasValidas[indice], 0);
         return true;
+    }
+
+    limpiarLineas(): number {
+        const filasIncompletas = this._celdas.filter(
+            fila => !fila.every(celda => celda !== 0)
+        );
+        const lineasEliminadas = this._alto - filasIncompletas.length;
+        const filasVacias = Array.from(
+            { length: lineasEliminadas },
+            () => Array(this._ancho).fill(0)
+        );
+
+        this._celdas = [...filasVacias, ...filasIncompletas];
+        this._cantidadLineas += lineasEliminadas;
+
+        return lineasEliminadas;
+    }
+
+    cantidadLineas(): number {
+        return this._cantidadLineas;
     }
 
     colisiona(pieza: Pieza, futuroX: number, futuroY: number): boolean {
