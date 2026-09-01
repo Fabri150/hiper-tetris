@@ -3,10 +3,13 @@ import { Tablero } from './Tablero';
 import { generarPiezaAleatoria } from './piezas/GeneradorPiezas';
 import { Pieza } from './piezas/Pieza';
 
+export type EstadoTetris = "no-iniciado" | "jugando" | "terminado";
+
 export class Tetris {
     private tablero = new Tablero();
     private piezaActual: Pieza;
     private reloj: Reloj;
+    private estadoActual: EstadoTetris = "no-iniciado";
 
     constructor(private random: () => number = Math.random) {
         this.piezaActual = generarPiezaAleatoria(this.random);
@@ -14,7 +17,10 @@ export class Tetris {
         this.reloj = new Reloj(1000, () => this.ejecutarCicloCaida()); //caida automatica cada 1 segundo
     }
 
-    iniciar() {
+    iniciar(): void {
+        if (this.estadoActual === "terminado") return;
+
+        this.estadoActual = "jugando";
         this.reloj.iniciar();
     }
 
@@ -23,7 +29,16 @@ export class Tetris {
     }
 
     tick(): void {
+        if (this.estadoActual === "terminado") return;
+        if (this.estadoActual === "no-iniciado") {
+            this.estadoActual = "jugando";
+        }
+
         this.reloj.tick();
+    }
+
+    get estado(): EstadoTetris {
+        return this.estadoActual;
     }
 
     get estadoPiezaActual() {
@@ -45,6 +60,8 @@ export class Tetris {
 
 
    private ejecutarCicloCaida(): void {
+        if (this.estadoActual === "terminado") return;
+
         const futuroY = this.piezaActual.fila + 1;
 
         if (!this.tablero.colisiona(this.piezaActual, this.piezaActual.columna, futuroY)) {
@@ -52,17 +69,27 @@ export class Tetris {
         } else {
             this.tablero.fijarPieza(this.piezaActual);
             this.tablero.limpiarLineas();
-            
-            // (Futuro paso) aca es donde se va vereficar si perdes si la pieza nueva nace colisionando
-            
-            // 2. Nace una nueva pieza arriba
-            this.piezaActual = generarPiezaAleatoria(this.random);
-            this.tablero.ubicarPiezaArriba(this.piezaActual, this.random);
+
+            const nuevaPieza = generarPiezaAleatoria(this.random);
+
+            if (!this.tablero.ubicarPiezaArriba(nuevaPieza, this.random)) {
+                this.finalizar();
+                return;
+            }
+
+            this.piezaActual = nuevaPieza;
         }
+    }
+
+    private finalizar(): void {
+        this.estadoActual = "terminado";
+        this.reloj.detener();
     }
 
     // Lógica impulsada por el teclado
     moverIzquierda(): void {
+        if (this.estadoActual === "terminado") return;
+
         const futuroX = this.piezaActual.columna - 1;
         if (!this.tablero.colisiona(this.piezaActual, futuroX, this.piezaActual.fila)) {
             this.piezaActual.moverIzquierda();
@@ -70,6 +97,8 @@ export class Tetris {
     }
 
     moverDerecha(): void {
+        if (this.estadoActual === "terminado") return;
+
         const futuroX = this.piezaActual.columna + 1;
         if (!this.tablero.colisiona(this.piezaActual, futuroX, this.piezaActual.fila)) {
             this.piezaActual.moverDerecha();
@@ -77,6 +106,8 @@ export class Tetris {
     }
 
     rotarIzquierda(): void {
+        if (this.estadoActual === "terminado") return;
+
         this.piezaActual.rotarIzquierda();
 
         if (this.tablero.colisiona(
@@ -89,6 +120,8 @@ export class Tetris {
     }
 
     rotarDerecha(): void {
+        if (this.estadoActual === "terminado") return;
+
         this.piezaActual.rotarDerecha();
 
         if (this.tablero.colisiona(
