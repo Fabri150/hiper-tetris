@@ -8,10 +8,16 @@ describe("Reloj", () => {
         vi.useRealTimers();
     });
 
-    test("un tick manual ejecuta el callback una sola vez", () => {
+    test("solo ejecuta el callback periódicamente después de iniciar", () => {
         const callback = vi.fn();
-        new Reloj(1000, callback).tick();
+        const reloj = new Reloj(1000, callback);
+        vi.advanceTimersByTime(2000);
+        expect(callback).not.toHaveBeenCalled();
+        reloj.iniciar();
+        vi.advanceTimersByTime(1000);
         expect(callback).toHaveBeenCalledTimes(1);
+        vi.advanceTimersByTime(1000);
+        expect(callback).toHaveBeenCalledTimes(2);
     });
 
     test("inicia sin duplicar intervalos y deja de ejecutar al detenerse", () => {

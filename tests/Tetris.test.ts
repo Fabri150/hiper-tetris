@@ -1,12 +1,13 @@
-import { afterEach, describe, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { Tetris } from "../src/Tetris";
 
-describe("Tetris", () => {
-    afterEach(() => {
-        vi.clearAllTimers();
-        vi.useRealTimers();
-    });
+beforeEach(() => vi.useFakeTimers());
+afterEach(() => {
+    vi.clearAllTimers();
+    vi.useRealTimers();
+});
 
+describe("Tetris", () => {
     test("crea la pieza en una columna aleatoria y expone copias del estado", () => {
         const valores = [0, 0, 0.999999];
         const tetris = new Tetris(() => valores.shift() ?? 0);
@@ -24,9 +25,11 @@ describe("Tetris", () => {
         expect(tetris.celdasTablero[0][0]).toBe(0);
     });
 
-    test("inicia, baja por reloj, se detiene y permite continuar con ticks manuales", () => {
-        vi.useFakeTimers();
+    test("solo cae al iniciar el reloj y permite detenerlo y reiniciarlo", () => {
         const tetris = new Tetris(() => 0);
+        vi.advanceTimersByTime(2000);
+        expect(tetris.estado).toBe("no-iniciado");
+        expect(tetris.estadoPiezaActual.fila).toBe(0);
         tetris.iniciar();
         expect(tetris.estado).toBe("jugando");
         vi.advanceTimersByTime(1000);
@@ -34,7 +37,8 @@ describe("Tetris", () => {
         tetris.detener();
         vi.advanceTimersByTime(2000);
         expect(tetris.estadoPiezaActual.fila).toBe(1);
-        tetris.tick();
+        tetris.iniciar();
+        vi.advanceTimersByTime(1000);
         expect(tetris.estadoPiezaActual.fila).toBe(2);
     });
 });
@@ -77,7 +81,8 @@ describe("Movimientos de Tetris", () => {
 
     test("deshace una rotación que choca con bloques fijados", () => {
         const tetris = new Tetris(() => 0);
-        for (let tick = 0; tick < 35; tick++) tetris.tick();
+        tetris.iniciar();
+        vi.advanceTimersByTime(35000);
         const anterior = tetris.estadoPiezaActual;
         expect(anterior.fila).toBe(16);
         tetris.rotarDerecha();
@@ -86,39 +91,31 @@ describe("Movimientos de Tetris", () => {
 
     test("fija la pieza bloqueada y los ticks siguientes mueven solamente la nueva", () => {
         const tetris = new Tetris(() => 0);
-        tetris.tick();
+        tetris.iniciar();
+        vi.advanceTimersByTime(1000);
         expect(tetris.estado).toBe("jugando");
         expect(tetris.estadoPiezaActual.fila).toBe(1);
-        for (let tick = 0; tick < 18; tick++) tetris.tick();
+        vi.advanceTimersByTime(18000);
         expect(tetris.celdasTablero[18][1]).toBe(1);
         expect(tetris.celdasTablero[19].slice(0, 3)).toEqual([1, 1, 1]);
         expect(tetris.estadoPiezaActual.fila).toBe(0);
         const tablero = tetris.celdasTablero;
-        tetris.tick();
+        vi.advanceTimersByTime(1000);
         expect(tetris.estadoPiezaActual.fila).toBe(1);
         expect(tetris.celdasTablero).toEqual(tablero);
     });
 });
 
 describe("Fin de partida", () => {
-    afterEach(() => {
-        vi.clearAllTimers();
-        vi.useRealTimers();
-    });
-
     test("termina sin espacio, detiene el reloj e impide nuevas acciones", () => {
-        vi.useFakeTimers();
         const tetris = new Tetris(() => 0);
         tetris.iniciar();
-        for (let tick = 0; tick < 1000 && tetris.estado !== "terminado"; tick++) {
-            tetris.tick();
-        }
+        vi.advanceTimersByTime(1000000);
         expect(tetris.estado).toBe("terminado");
         expect(vi.getTimerCount()).toBe(0);
         const pieza = tetris.estadoPiezaActual;
         const tablero = tetris.celdasTablero;
         tetris.iniciar();
-        tetris.tick();
         tetris.moverIzquierda();
         tetris.moverDerecha();
         tetris.rotarIzquierda();
@@ -141,13 +138,7 @@ function crearPartida(objetivo: number): Tetris {
 }
 
 describe("Objetivo de líneas", () => {
-    afterEach(() => {
-        vi.clearAllTimers();
-        vi.useRealTimers();
-    });
-
     test("termina al alcanzar el objetivo y detiene el reloj", () => {
-        vi.useFakeTimers();
         const tetris = crearPartida(1);
         expect(tetris.cantidadLineas).toBe(1);
         expect(tetris.estado).toBe("terminado");
@@ -158,7 +149,6 @@ describe("Objetivo de líneas", () => {
     });
 
     test("limpia la fila completa y continúa mientras no alcance el objetivo", () => {
-        vi.useFakeTimers();
         const tetris = crearPartida(2);
         expect(tetris.cantidadLineas).toBe(1);
         expect(tetris.estado).toBe("jugando");
