@@ -8,14 +8,16 @@ describe("Reloj", () => {
         vi.useRealTimers();
     });
 
-    test("solo ejecuta el callback periódicamente después de iniciar", () => {
+    test("permite avances manuales sin iniciar el intervalo automático", () => {
         const callback = vi.fn();
         const reloj = new Reloj(1000, callback);
         vi.advanceTimersByTime(2000);
         expect(callback).not.toHaveBeenCalled();
-        reloj.iniciar();
-        vi.advanceTimersByTime(1000);
+        reloj.tick();
         expect(callback).toHaveBeenCalledTimes(1);
+        reloj.tick();
+        expect(callback).toHaveBeenCalledTimes(2);
+        expect(vi.getTimerCount()).toBe(0);
         vi.advanceTimersByTime(1000);
         expect(callback).toHaveBeenCalledTimes(2);
     });

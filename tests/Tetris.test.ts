@@ -25,21 +25,27 @@ describe("Tetris", () => {
         expect(tetris.celdasTablero[0][0]).toBe(0);
     });
 
-    test("solo cae al iniciar el reloj y permite detenerlo y reiniciarlo", () => {
+    test("permite avances manuales y controlar la caída automática", () => {
         const tetris = new Tetris(() => 0);
         vi.advanceTimersByTime(2000);
         expect(tetris.estado).toBe("no-iniciado");
         expect(tetris.estadoPiezaActual.fila).toBe(0);
+        tetris.tick();
+        expect(tetris.estado).toBe("jugando");
+        expect(tetris.estadoPiezaActual.fila).toBe(1);
+        expect(vi.getTimerCount()).toBe(0);
+        vi.advanceTimersByTime(1000);
+        expect(tetris.estadoPiezaActual.fila).toBe(1);
         tetris.iniciar();
         expect(tetris.estado).toBe("jugando");
         vi.advanceTimersByTime(1000);
-        expect(tetris.estadoPiezaActual.fila).toBe(1);
+        expect(tetris.estadoPiezaActual.fila).toBe(2);
         tetris.detener();
         vi.advanceTimersByTime(2000);
-        expect(tetris.estadoPiezaActual.fila).toBe(1);
+        expect(tetris.estadoPiezaActual.fila).toBe(2);
         tetris.iniciar();
         vi.advanceTimersByTime(1000);
-        expect(tetris.estadoPiezaActual.fila).toBe(2);
+        expect(tetris.estadoPiezaActual.fila).toBe(3);
     });
 });
 
@@ -116,6 +122,7 @@ describe("Fin de partida", () => {
         const pieza = tetris.estadoPiezaActual;
         const tablero = tetris.celdasTablero;
         tetris.iniciar();
+        tetris.tick();
         tetris.moverIzquierda();
         tetris.moverDerecha();
         tetris.rotarIzquierda();
@@ -144,6 +151,7 @@ describe("Objetivo de líneas", () => {
         expect(tetris.estado).toBe("terminado");
         expect(vi.getTimerCount()).toBe(0);
         const pieza = tetris.estadoPiezaActual;
+        tetris.tick();
         vi.advanceTimersByTime(5000);
         expect(tetris.estadoPiezaActual).toEqual(pieza);
     });
