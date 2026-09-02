@@ -2,65 +2,41 @@ import { Pieza } from "./piezas/Pieza";
 
 export class Tablero {
     private _celdas: number[][];
-    private _cantidadLineas: number = 0;
+    private _cantidadLineas = 0;
 
-    constructor (
-     private _ancho: number = 10,
-     private _alto: number = 20
-
-    ) {
+    constructor(private _ancho = 10, private _alto = 20) {
         this._celdas = Array.from({ length: this._alto }, () => Array(this._ancho).fill(0));
     }
+
     get celdas(): number[][] {
         return this._celdas.map(fila => [...fila]);
     }
 
+    // Convierte solamente los bloques ocupados en coordenadas del tablero.
+    private bloques(pieza: Pieza, x = pieza.columna, y = pieza.fila) {
+        return pieza.forma.flatMap((fila, f) =>
+            fila.map((celda, c) => ({ celda, columna: x + c, fila: y + f }))
+                .filter(bloque => bloque.celda !== 0)
+        );
+    }
 
     fijarPieza(pieza: Pieza): boolean {
-        const matriz = pieza.forma;
-        const bloques: Array<[number, number]> = [];
-
-        for (let f = 0; f < matriz.length; f++) {
-            for (let c = 0; c < matriz[f].length; c++) {
-                if (matriz[f][c] === 0) continue;
-
-                const tableroY = pieza.fila + f;
-                const tableroX = pieza.columna + c;
-                const estaFuera =
-                    tableroY < 0 || tableroY >= this._alto ||
-                    tableroX < 0 || tableroX >= this._ancho;
-
-                if (estaFuera || this._celdas[tableroY][tableroX] !== 0) {
-                    return false;
-                }
-
-                bloques.push([tableroY, tableroX]);
-            }
+        const bloques = this.bloques(pieza);
+        if (bloques.some(({ fila, columna }) => this._celdas[fila]?.[columna] !== 0)) {
+            return false;
         }
 
-        for (const [fila, columna] of bloques) {
-            this._celdas[fila][columna] = 1;
-        }
-
+        bloques.forEach(({ fila, columna }) => this._celdas[fila][columna] = 1);
         return true;
     }
 
-    ubicarPiezaArriba(
-        pieza: Pieza,
-        random: () => number = Math.random
-    ): boolean {
-        const anchoPieza = pieza.forma[0].length;
-        const columnasValidas: number[] = [];
+    ubicarPiezaArriba(pieza: Pieza, random: () => number = Math.random): boolean {
+        const columnasValidas = Array.from(
+            { length: Math.max(0, this._ancho - pieza.forma[0].length + 1) },
+            (_, columna) => columna
+        ).filter(columna => !this.colisiona(pieza, columna, 0));
 
-        for (let columna = 0; columna <= this._ancho - anchoPieza; columna++) {
-            if (!this.colisiona(pieza, columna, 0)) {
-                columnasValidas.push(columna);
-            }
-        }
-
-        if (columnasValidas.length === 0) {
-            return false;
-        }
+        if (columnasValidas.length === 0) return false;
 
         const indice = Math.floor(random() * columnasValidas.length);
         pieza.posicionar(columnasValidas[indice], 0);
@@ -76,10 +52,8 @@ export class Tablero {
             { length: lineasEliminadas },
             () => Array(this._ancho).fill(0)
         );
-
         this._celdas = [...filasVacias, ...filasIncompletas];
         this._cantidadLineas += lineasEliminadas;
-
         return lineasEliminadas;
     }
 
@@ -88,34 +62,9 @@ export class Tablero {
     }
 
     colisiona(pieza: Pieza, futuroX: number, futuroY: number): boolean {
-     const matriz = pieza.forma;
-
-     for (let f = 0; f < matriz.length; f++) {
-        for (let c = 0; c < matriz[f].length; c++) {
-
-            if (matriz[f][c] === 0) continue;
-
-            const tableroX = futuroX + c;
-            const tableroY = futuroY + f;
-
-            // 1. Choca con pared Izquierda o Derecha
-            if (tableroX < 0 || tableroX >= this._ancho) {
-                return true;
-            }
-
-            // 2. Choca con el fondo
-            if (tableroY >= this._alto) {
-                return true;
-            }
-
-            if (tableroY >= 0 && this._celdas[tableroY][tableroX] !== 0) {
-                return true;
-            }
-        }
+        return this.bloques(pieza, futuroX, futuroY).some(({ fila, columna }) =>
+            columna < 0 || columna >= this._ancho || fila >= this._alto ||
+            (fila >= 0 && this._celdas[fila][columna] !== 0)
+        );
     }
-    
-    return false;
-    
-}
-
 }

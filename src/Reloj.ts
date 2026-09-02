@@ -28,8 +28,6 @@ export class Reloj {
         this._intervaloMs = nuevoIntervaloMs;
         this.detener();
 
-        if (estabaCorriendo) {
-            this.iniciar();
-        }
+        estabaCorriendo && this.iniciar();
     }
 }

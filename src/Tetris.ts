@@ -11,10 +11,13 @@ export class Tetris {
     private reloj: Reloj;
     private estadoActual: EstadoTetris = "no-iniciado";
 
-    constructor(private random: () => number = Math.random) {
+    constructor(
+        private random: () => number = Math.random,
+        private objetivoLineas: number = 5
+    ) {
         this.piezaActual = generarPiezaAleatoria(this.random);
         this.tablero.ubicarPiezaArriba(this.piezaActual, this.random);
-        this.reloj = new Reloj(1000, () => this.ejecutarCicloCaida()); //caida automatica cada 1 segundo
+        this.reloj = new Reloj(1000, () => this.ejecutarCicloCaida());
     }
 
     iniciar(): void {
@@ -57,9 +60,7 @@ export class Tetris {
     get cantidadLineas(): number {
         return this.tablero.cantidadLineas();
     }
-
-
-   private ejecutarCicloCaida(): void {
+    private ejecutarCicloCaida(): void {
         if (this.estadoActual === "terminado") return;
 
         const futuroY = this.piezaActual.fila + 1;
@@ -69,6 +70,11 @@ export class Tetris {
         } else {
             this.tablero.fijarPieza(this.piezaActual);
             this.tablero.limpiarLineas();
+
+            if (this.tablero.cantidadLineas() >= this.objetivoLineas) {
+                this.finalizar();
+                return;
+            }
 
             const nuevaPieza = generarPiezaAleatoria(this.random);
 
@@ -86,7 +92,6 @@ export class Tetris {
         this.reloj.detener();
     }
 
-    // Lógica impulsada por el teclado
     moverIzquierda(): void {
         if (this.estadoActual === "terminado") return;
 
