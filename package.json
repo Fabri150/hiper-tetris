@@ -4,7 +4,9 @@
   "description": "Tetris game on TypeScript",
   "main": "index.js",
   "scripts": {
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit"
   },
   "repository": {
     "type": "git",
@@ -20,6 +22,7 @@
   "homepage": "https://github.com/Fabri150/hiper-tetris#readme",
   "devDependencies": {
     "@rolldown/binding-win32-x64-msvc": "^1.2.5",
+    "@vitest/coverage-v8": "^4.1.11",
     "vitest": "^4.1.11"
   },
   "dependencies": {
