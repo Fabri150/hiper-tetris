@@ -1,118 +1,111 @@
-import { describe, it, expect } from 'vitest';
-import { Tablero } from '../src/Tablero';
-import { PiezaCuadrado } from '../src/piezas/PiezaCuadrado';
+import { describe, it, expect, test } from "vitest";
+import { Tablero } from "../src/Tablero";
+import { PiezaCuadrado } from "../src/piezas/PiezaCuadrado";
+import { PiezaPalo } from "../src/piezas/PiezaPalo";
 
-describe('Tablero', () => {
-    it('debe crear un tablero con las dimensiones correctas', () => {
-        const tablero = new Tablero(10, 20);
-        expect(tablero.celdas).toHaveLength(20);
-        expect(tablero.celdas[0]).toHaveLength(10);
-    });
-    it('debe inicializar todas las celdas en 0', () => {
+describe("Tablero", () => {
+    it("crea una matriz vacía de 10 por 20 y devuelve una copia", () => {
         const tablero = new Tablero();
-        const matriz = tablero.celdas;
-        matriz.forEach(fila => {fila.forEach(celda => {expect(celda).toBe(0);});});
-    });
-
-    it('debe fijar una pieza completa', () => {
-        const tablero = new Tablero();
-        const pieza = new PiezaCuadrado();
-
-        expect(tablero.fijarPieza(pieza)).toBe(true);
-        expect(tablero.celdas[0][3]).toBe(1);
-        expect(tablero.celdas[0][4]).toBe(1);
-        expect(tablero.celdas[1][3]).toBe(1);
-        expect(tablero.celdas[1][4]).toBe(1);
-    });
-
-    it('debe detectar una colision con la pared izquierda', () => {
-        const tablero = new Tablero();
-        const pieza = new PiezaCuadrado();
-
-        expect(tablero.colisiona(pieza, -1, pieza.fila)).toBe(true);
-    });
-
-    it('debe detectar una colision con la pared derecha', () => {
-        const tablero = new Tablero();
-        const pieza = new PiezaCuadrado();
-
-        expect(tablero.colisiona(pieza, 9, pieza.fila)).toBe(true);
-    });
-
-    it('debe detectar una colision con el fondo', () => {
-        const tablero = new Tablero();
-        const pieza = new PiezaCuadrado();
-
-        expect(tablero.colisiona(pieza, pieza.columna, 19)).toBe(true);
-    });
-
-    it('debe detectar una colision con bloques fijados', () => {
-        const tablero = new Tablero();
-        const piezaFijada = new PiezaCuadrado();
-        const piezaNueva = new PiezaCuadrado();
-
-        tablero.fijarPieza(piezaFijada);
-
-        expect(
-            tablero.colisiona(piezaNueva, piezaNueva.columna, piezaNueva.fila)
-        ).toBe(true);
-    });
-
-    it('no debe cambiar si la pieza atraviesa una pared', () => {
-        const tablero = new Tablero();
-        const pieza = new PiezaCuadrado();
-        pieza.moverIzquierda();
-        pieza.moverIzquierda();
-        pieza.moverIzquierda();
-        pieza.moverIzquierda();
-        const estadoAnterior = tablero.celdas;
-
-        expect(tablero.fijarPieza(pieza)).toBe(false);
-        expect(tablero.celdas).toEqual(estadoAnterior);
-    });
-
-    it('no debe cambiar si la pieza atraviesa el fondo', () => {
-        const tablero = new Tablero();
-        const pieza = new PiezaCuadrado();
-        for (let movimiento = 0; movimiento < 19; movimiento++) {
-            pieza.moverAbajo();
-        }
-        const estadoAnterior = tablero.celdas;
-
-        expect(tablero.fijarPieza(pieza)).toBe(false);
-        expect(tablero.celdas).toEqual(estadoAnterior);
-    });
-
-    it('no debe exponer sus celdas internas para modificacion', () => {
-        const tablero = new Tablero();
-        const celdasConsultadas = tablero.celdas;
-
-        celdasConsultadas[0][0] = 1;
-
+        expect(tablero.celdas).toEqual(Array.from({ length: 20 }, () => Array(10).fill(0)));
+        const copia = tablero.celdas;
+        copia[0][0] = 1;
         expect(tablero.celdas[0][0]).toBe(0);
     });
 
-    it('debe ubicar una pieza arriba en una columna aleatoria valida', () => {
+    it("fija cuatro bloques y rechaza una pieza superpuesta sin modificar nada", () => {
         const tablero = new Tablero();
         const pieza = new PiezaCuadrado();
-
-        const fueUbicada = tablero.ubicarPiezaArriba(pieza, () => 0);
-
-        expect(fueUbicada).toBe(true);
-        expect(pieza.columna).toBe(0);
-        expect(pieza.fila).toBe(0);
-        expect(tablero.colisiona(pieza, pieza.columna, pieza.fila)).toBe(false);
+        expect(tablero.fijarPieza(pieza)).toBe(true);
+        expect(tablero.celdas.slice(0, 2).map(fila => fila.slice(3, 5))).toEqual([[1, 1], [1, 1]]);
+        expect(tablero.celdas.flat().filter(celda => celda === 1)).toHaveLength(4);
+        const anterior = tablero.celdas;
+        expect(tablero.colisiona(pieza, 3, 0)).toBe(true);
+        expect(tablero.fijarPieza(pieza)).toBe(false);
+        expect(tablero.celdas).toEqual(anterior);
     });
 
-    it('debe devolver false si no hay una posicion superior disponible', () => {
+    it.each([
+        { columna: -1, fila: 0 },
+        { columna: 0, fila: 19 },
+        { columna: 0, fila: -1 }
+    ])("rechaza fijar fuera del tablero en ($columna, $fila)", ({ columna, fila }) => {
         const tablero = new Tablero();
-        for (let columna = 0; columna < 10; columna += 2) {
-            const piezaFijada = new PiezaCuadrado();
-            piezaFijada.posicionar(columna, 0);
-            tablero.fijarPieza(piezaFijada);
-        }
-        const piezaNueva = new PiezaCuadrado();
+        const pieza = new PiezaCuadrado();
+        pieza.posicionar(columna, fila);
+        const anterior = tablero.celdas;
+        expect(tablero.fijarPieza(pieza)).toBe(false);
+        expect(tablero.celdas).toEqual(anterior);
+    });
 
-        expect(tablero.ubicarPiezaArriba(piezaNueva, () => 0)).toBe(false);
+    it("detecta paredes y fondo, pero permite caer desde arriba", () => {
+        const tablero = new Tablero();
+        const pieza = new PiezaCuadrado();
+        expect(tablero.colisiona(pieza, -1, 0)).toBe(true);
+        expect(tablero.colisiona(pieza, 9, 0)).toBe(true);
+        expect(tablero.colisiona(pieza, 0, 19)).toBe(true);
+        expect(tablero.colisiona(pieza, 0, -1)).toBe(false);
+        expect(tablero.colisiona(pieza, 0, 18)).toBe(false);
+    });
+
+    it("ubica arriba al azar entre las columnas libres", () => {
+        const tablero = new Tablero();
+        const pieza = new PiezaCuadrado();
+        pieza.posicionar(0);
+        tablero.fijarPieza(pieza);
+        expect(tablero.ubicarPiezaArriba(pieza, () => 0)).toBe(true);
+        expect([pieza.columna, pieza.fila]).toEqual([2, 0]);
+        expect(tablero.ubicarPiezaArriba(pieza, () => 0.999999)).toBe(true);
+        expect([pieza.columna, pieza.fila]).toEqual([8, 0]);
+    });
+
+    it("rechaza la aparición sin espacio y conserva la posición anterior", () => {
+        const tablero = new Tablero(2, 2);
+        const pieza = new PiezaCuadrado();
+        pieza.posicionar(0);
+        tablero.fijarPieza(pieza);
+        const nueva = new PiezaCuadrado();
+        expect(tablero.ubicarPiezaArriba(nueva, () => 0)).toBe(false);
+        expect([nueva.columna, nueva.fila]).toEqual([3, 0]);
+    });
+});
+
+describe("Limpieza de líneas", () => {
+    test("conserva las filas incompletas sin aumentar el contador", () => {
+        const tablero = new Tablero();
+        const palo = new PiezaPalo();
+        palo.posicionar(0, 19);
+        tablero.fijarPieza(palo);
+        const anterior = tablero.celdas;
+        expect(tablero.limpiarLineas()).toBe(0);
+        expect(tablero.celdas).toEqual(anterior);
+        expect(tablero.cantidadLineas()).toBe(0);
+    });
+
+    test("elimina una línea, baja los bloques superiores y repone una fila vacía", () => {
+        const tablero = new Tablero();
+        for (const columna of [0, 4]) {
+            const palo = new PiezaPalo();
+            palo.posicionar(columna, 19);
+            tablero.fijarPieza(palo);
+        }
+        const cuadrado = new PiezaCuadrado();
+        cuadrado.posicionar(8, 18);
+        tablero.fijarPieza(cuadrado);
+        expect(tablero.limpiarLineas()).toBe(1);
+        expect(tablero.cantidadLineas()).toBe(1);
+        expect(tablero.celdas[19]).toEqual([0, 0, 0, 0, 0, 0, 0, 0, 1, 1]);
+        expect(tablero.celdas[0]).toEqual(Array(10).fill(0));
+    });
+
+    test("elimina dos líneas juntas y acumula el total en limpiezas sucesivas", () => {
+        const tablero = new Tablero(2, 4);
+        const pieza = new PiezaCuadrado();
+        pieza.posicionar(0, 2);
+        tablero.fijarPieza(pieza);
+        expect(tablero.limpiarLineas()).toBe(2);
+        tablero.fijarPieza(pieza);
+        expect(tablero.limpiarLineas()).toBe(2);
+        expect(tablero.cantidadLineas()).toBe(4);
+        expect(tablero.celdas).toEqual([[0, 0], [0, 0], [0, 0], [0, 0]]);
     });
 });

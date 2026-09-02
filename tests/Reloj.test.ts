@@ -2,74 +2,49 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { Reloj } from "../src/Reloj";
 
 describe("Reloj", () => {
-    beforeEach(() => {
-        vi.useFakeTimers();
-    });
-
+    beforeEach(() => vi.useFakeTimers());
     afterEach(() => {
         vi.clearAllTimers();
         vi.useRealTimers();
     });
 
-    test("un tick manual ejecuta el callback exactamente una vez", () => {
+    test("un tick manual ejecuta el callback una sola vez", () => {
         const callback = vi.fn();
-        const reloj = new Reloj(1000, callback);
-
-        reloj.tick();
-
+        new Reloj(1000, callback).tick();
         expect(callback).toHaveBeenCalledTimes(1);
     });
 
-    test("iniciar ejecuta un tick al cumplirse el intervalo", () => {
+    test("inicia sin duplicar intervalos y deja de ejecutar al detenerse", () => {
         const callback = vi.fn();
         const reloj = new Reloj(1000, callback);
-
         reloj.iniciar();
-        vi.advanceTimersByTime(1000);
-
+        reloj.iniciar();
+        vi.advanceTimersByTime(999);
+        expect(callback).not.toHaveBeenCalled();
+        vi.advanceTimersByTime(1);
         expect(callback).toHaveBeenCalledTimes(1);
-    });
-
-    test("detener evita ticks posteriores", () => {
-        const callback = vi.fn();
-        const reloj = new Reloj(1000, callback);
-
-        reloj.iniciar();
         reloj.detener();
         vi.advanceTimersByTime(2000);
-
-        expect(callback).not.toHaveBeenCalled();
-    });
-
-    test("iniciar dos veces no crea intervalos simultaneos", () => {
-        const callback = vi.fn();
-        const reloj = new Reloj(1000, callback);
-
-        reloj.iniciar();
-        reloj.iniciar();
-        vi.advanceTimersByTime(1000);
-
         expect(callback).toHaveBeenCalledTimes(1);
     });
 
-    test("cambiarVelocidad actualiza un reloj iniciado", () => {
+    test("cambia la velocidad de un reloj en marcha", () => {
         const callback = vi.fn();
         const reloj = new Reloj(1000, callback);
-
         reloj.iniciar();
         reloj.cambiarVelocidad(500);
         vi.advanceTimersByTime(1000);
-
         expect(callback).toHaveBeenCalledTimes(2);
     });
 
-    test("cambiarVelocidad no inicia un reloj detenido", () => {
+    test("cambiar la velocidad no inicia el reloj y se aplica al iniciarlo", () => {
         const callback = vi.fn();
         const reloj = new Reloj(1000, callback);
-
         reloj.cambiarVelocidad(500);
         vi.advanceTimersByTime(1000);
-
         expect(callback).not.toHaveBeenCalled();
+        reloj.iniciar();
+        vi.advanceTimersByTime(1000);
+        expect(callback).toHaveBeenCalledTimes(2);
     });
 });
