@@ -21,23 +21,14 @@ export class Tetris {
     }
 
     iniciar(): void {
-        if (this.estadoActual === "terminado") return;
-
-        this.estadoActual = "jugando";
-        this.reloj.iniciar();
+        this.ejecutarSiActivo(() => {
+            this.estadoActual = "jugando";
+            this.reloj.iniciar();
+        });
     }
 
     detener(): void {
         this.reloj.detener();
-    }
-
-    tick(): void {
-        if (this.estadoActual === "terminado") return;
-        if (this.estadoActual === "no-iniciado") {
-            this.estadoActual = "jugando";
-        }
-
-        this.reloj.tick();
     }
 
     get estado(): EstadoTetris {
@@ -60,31 +51,33 @@ export class Tetris {
     get cantidadLineas(): number {
         return this.tablero.cantidadLineas();
     }
+
+    private ejecutarSiActivo(accion: () => void): void {
+        this.estadoActual !== "terminado" && accion();
+    }
+
     private ejecutarCicloCaida(): void {
-        if (this.estadoActual === "terminado") return;
+        this.ejecutarSiActivo(() => {
+            const bloqueada = this.tablero.colisiona(
+                this.piezaActual, this.piezaActual.columna, this.piezaActual.fila + 1
+            );
+            bloqueada ? this.fijarYContinuar() : this.piezaActual.moverAbajo();
+        });
+    }
 
-        const futuroY = this.piezaActual.fila + 1;
+    private fijarYContinuar(): void {
+        this.tablero.fijarPieza(this.piezaActual);
+        this.tablero.limpiarLineas();
+        this.cantidadLineas >= this.objetivoLineas
+            ? this.finalizar()
+            : this.crearSiguientePieza();
+    }
 
-        if (!this.tablero.colisiona(this.piezaActual, this.piezaActual.columna, futuroY)) {
-            this.piezaActual.moverAbajo();
-        } else {
-            this.tablero.fijarPieza(this.piezaActual);
-            this.tablero.limpiarLineas();
-
-            if (this.tablero.cantidadLineas() >= this.objetivoLineas) {
-                this.finalizar();
-                return;
-            }
-
-            const nuevaPieza = generarPiezaAleatoria(this.random);
-
-            if (!this.tablero.ubicarPiezaArriba(nuevaPieza, this.random)) {
-                this.finalizar();
-                return;
-            }
-
-            this.piezaActual = nuevaPieza;
-        }
+    private crearSiguientePieza(): void {
+        const nuevaPieza = generarPiezaAleatoria(this.random);
+        this.tablero.ubicarPiezaArriba(nuevaPieza, this.random)
+            ? this.piezaActual = nuevaPieza
+            : this.finalizar();
     }
 
     private finalizar(): void {
@@ -93,48 +86,39 @@ export class Tetris {
     }
 
     moverIzquierda(): void {
-        if (this.estadoActual === "terminado") return;
-
-        const futuroX = this.piezaActual.columna - 1;
-        if (!this.tablero.colisiona(this.piezaActual, futuroX, this.piezaActual.fila)) {
-            this.piezaActual.moverIzquierda();
-        }
+        this.intentarAccion(
+            () => this.piezaActual.moverIzquierda(),
+            () => this.piezaActual.moverDerecha()
+        );
     }
 
     moverDerecha(): void {
-        if (this.estadoActual === "terminado") return;
-
-        const futuroX = this.piezaActual.columna + 1;
-        if (!this.tablero.colisiona(this.piezaActual, futuroX, this.piezaActual.fila)) {
-            this.piezaActual.moverDerecha();
-        }
+        this.intentarAccion(
+            () => this.piezaActual.moverDerecha(),
+            () => this.piezaActual.moverIzquierda()
+        );
     }
 
     rotarIzquierda(): void {
-        if (this.estadoActual === "terminado") return;
-
-        this.piezaActual.rotarIzquierda();
-
-        if (this.tablero.colisiona(
-            this.piezaActual,
-            this.piezaActual.columna,
-            this.piezaActual.fila
-        )) {
-            this.piezaActual.rotarDerecha();
-        }
+        this.intentarAccion(
+            () => this.piezaActual.rotarIzquierda(),
+            () => this.piezaActual.rotarDerecha()
+        );
     }
 
     rotarDerecha(): void {
-        if (this.estadoActual === "terminado") return;
+        this.intentarAccion(
+            () => this.piezaActual.rotarDerecha(),
+            () => this.piezaActual.rotarIzquierda()
+        );
+    }
 
-        this.piezaActual.rotarDerecha();
-
-        if (this.tablero.colisiona(
-            this.piezaActual,
-            this.piezaActual.columna,
-            this.piezaActual.fila
-        )) {
-            this.piezaActual.rotarIzquierda();
-        }
+    private intentarAccion(accion: () => void, deshacer: () => void): void {
+        this.ejecutarSiActivo(() => {
+            accion();
+            this.tablero.colisiona(
+                this.piezaActual, this.piezaActual.columna, this.piezaActual.fila
+            ) && deshacer();
+        });
     }
 }
