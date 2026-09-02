@@ -31,6 +31,13 @@ export class Tetris {
         this.reloj.detener();
     }
 
+    tick(): void {
+        this.ejecutarSiActivo(() => {
+            this.estadoActual = "jugando";
+            this.reloj.tick();
+        });
+    }
+
     get estado(): EstadoTetris {
         return this.estadoActual;
     }
